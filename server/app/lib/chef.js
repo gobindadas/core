@@ -477,8 +477,7 @@ var Chef = function(settings) {
                 argList.push('--use-sudo-password');
             }
             argList.push('-P');
-            if (params.instanceOS == 'windows' && !params.instancePassword) {
-            } else {
+            if (params.instanceOS == 'windows' && !params.instancePassword) {} else {
                 argList.push('\"' + params.instancePassword + '\"');
             }
         }
@@ -530,9 +529,32 @@ var Chef = function(settings) {
             logger.debug('procEnv closed: ');
         });
 
+
+        console.log('typeof ===>', typeof params.jsonAttributes);
+
+        params.jsonAttributes = {
+            "rlcatalyst": {
+                "containerId": 'Gobinda',
+                "containerPort": '3001',
+                "dockerImage": 'relevancelab/opensc-catalyst',
+                "hostPort": '8080',
+                "imageTag": '3.0.5',
+                "upgrade": false,
+                "applicationNodeIP": '52.53.178.17',
+                anshul:{
+                    test:"gobinda"
+                }
+            }
+        };
+
+        console.log('jsonAttributes ===>', params.jsonAttributes);
+        console.log('jsonAttributes stringify ===> ', JSON.stringify(params.jsonAttributes));
+
+
         if (params.jsonAttributes) {
             argList.push('-j');
             var jsonAttributesString = JSON.stringify(params.jsonAttributes);
+            logger.debug("============================== ", jsonAttributesString);
             jsonAttributesString = jsonAttributesString.split('"').join('\\\"');
             argList.push(jsonAttributesString);
         }
@@ -671,8 +693,7 @@ var Chef = function(settings) {
             }
 
             logger.debug('host name ==>', options.host);
-            if (!options.password) {
-            }
+            if (!options.password) {}
             var proc = new Process('knife', ['winrm', options.host, ' "chef-client -o ' + runlist.join() + '"', '-m', '-P\"' + options.password + '\"', '-x' + options.username], processOptions);
             proc.start();
         }
@@ -702,8 +723,7 @@ var Chef = function(settings) {
                 callbackOnStdErr(data);
             }
         }
-        if (!options.password) {
-        }
+        if (!options.password) {}
         var proc = new Process('knife', ['winrm', options.host, "\'" + cmd + "\'", '-m', '-P\"', options.password + '\"', '-x', options.username], processOptions);
         proc.start();
     };
