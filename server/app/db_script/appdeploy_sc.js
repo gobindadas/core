@@ -21,6 +21,7 @@ var mongoDbConnect = require('_pr/lib/mongodb');
 var appConfig = require('_pr/config');
 var AppDeploy = require('_pr/model/app-deploy/app-deploy');
 var AppData = require('_pr/model/app-deploy/app-data');
+var AWSProvider = require('_pr/model/classes/masters/cloudprovider/awsCloudProvider.js');
 
 var dboptions = {
     host: appConfig.db.host,
@@ -36,18 +37,37 @@ mongoDbConnect(dboptions, function(err) {
     }
 });
 
-AppDeploy.removeAll(function(err,appdeploys){
-	if(err){
-		logger.debug("Error while cleanup appdeploy: ",err);
-		process.exit();
-	}
-	logger.debug("AppDeploy cleaned successfully..");
-	AppData.removeAll(function(err,appDatas){
-		if(err){
-			logger.debug("Error while cleanup appdata: ",err);
-			process.exit();
-		}
-		logger.debug("AppData cleaned successfully..");
-		process.exit();
-	});
+AWSProvider.getAWSProviders(function(err, providers) {
+    if (err) {
+        logger.error("Got error while fetching AWS-Provider: ", err);
+    }
+    logger.debug("Got Provider list: ");
+    if (providers && providers.length) {
+        for (var p = 0; p < providers.length; p++) {
+            providers[p]['s3BucketName'] = "RLBilling";
+            AWSProvider.updateAWSProviderById(providers[p]._id, providers[p], function(err, updatedProvider) {
+                if (err) {
+                    logger.error("Failed to update AWSProvider: ", err);
+                }
+            });
+        }
+    } else {
+        logger.debug("No AWSProvider configured.");
+    }
+});
+
+AppDeploy.removeAll(function(err, appdeploys) {
+    if (err) {
+        logger.debug("Error while cleanup appdeploy: ", err);
+        process.exit();
+    }
+    logger.debug("AppDeploy cleaned successfully..");
+    AppData.removeAll(function(err, appDatas) {
+        if (err) {
+            logger.debug("Error while cleanup appdata: ", err);
+            process.exit();
+        }
+        logger.debug("AppData cleaned successfully..");
+        process.exit();
+    });
 });

@@ -23,6 +23,7 @@ var AppDeploy = require('_pr/model/app-deploy/app-deploy');
 var AppData = require('_pr/model/app-deploy/app-data');
 var d4dModel = require('_pr/model/d4dmasters/d4dmastersmodel.js');
 var d4dModelNew = require('_pr/model/d4dmasters/d4dmastersmodelnew.js');
+var AWSProvider = require('_pr/model/classes/masters/cloudprovider/awsCloudProvider.js');
 
 var dboptions = {
     host: appConfig.db.host,
@@ -37,16 +38,19 @@ mongoDbConnect(dboptions, function(err) {
         logger.debug('connected to mongodb - host = %s, port = %s, database = %s', dboptions.host, dboptions.port, dboptions.dbName);
     }
 });
+//Update appdeploy with applicationLastDeploy as timestamp
 AppDeploy.getAppDeploy(function(err, deployedData) {
     if (err) {
-        logger.debug("Error while fetching appdeploy: ", err);
+        logger.error("Error while fetching appdeploy: ", err);
+        process.exit();
     }
     if (deployedData && deployedData.length) {
         for (var k = 0; k < deployedData.length; k++) {
             appDeployData[k]['applicationLastDeploy'] = Date.parse(appDeployData[k]['applicationLastDeploy']);
             AppDeploy.updateAppDeploy(appDeployData[k]._id, appDeployData[k], function(err, updatedData) {
                 if (err) {
-                    logger.debug("Error while updateing appdeploy: ", err);
+                    logger.error("Error while updateing appdeploy: ", err);
+                    process.exit();
                 }
                 logger.debug("Appdeploy updated successfully.. ", JSON.stringify(updatedData));
             });
@@ -54,6 +58,29 @@ AppDeploy.getAppDeploy(function(err, deployedData) {
     }
 });
 
+//Update AWS Provider with s3BucketName.
+AWSProvider.getAWSProviders(function(err, providers) {
+    if (err) {
+        logger.error("Got error while fetching AWS-Provider: ", err);
+        process.exit();
+    }
+    logger.debug("Got Provider list: ");
+    if (providers && providers.length) {
+        for (var p = 0; p < providers.length; p++) {
+            providers[p]['s3BucketName'] = "RLBilling";
+            AWSProvider.updateAWSProviderById(providers[p]._id, providers[p], function(err, updatedProvider) {
+                if (err) {
+                    logger.error("Failed to update AWSProvider: ", err);
+                    process.exit();
+                }
+            });
+        }
+    } else {
+        logger.debug("No AWSProvider configured.");
+    }
+});
+
+//Update AppData with nexus or docker
 AppData.getAll(function(err, appDatas) {
     if (err) {
         logger.debug("Error while get appdata: ", err);
@@ -66,6 +93,7 @@ AppData.getAll(function(err, appDatas) {
         d4dModelNew.d4dModelMastersNexusServer.find(function(err, nexusData) {
             if (err) {
                 logger.debug("Error while get nexusConfig: ", err);
+                process.exit();
             }
             if (nexusData && nexusData.length) {
                 nexusId = nexusData[0].rowid;
@@ -73,6 +101,7 @@ AppData.getAll(function(err, appDatas) {
             d4dModelNew.d4dModelMastersDockerConfig.find(function(err, dockerData) {
                 if (err) {
                     logger.debug("Error while get dockerConfig: ", err);
+                    process.exit();
                 }
                 if (dockerData && dockerData.length) {
                     dockerId = nexusData[0].rowid;
@@ -108,7 +137,6 @@ AppData.getAll(function(err, appDatas) {
                         AppData.update(appDatas[i]._id, appDatas[i], function(err, updatedData) {
                             if (err) {
                                 logger.debug("Error while update appdata: ", err);
-                                process.exit();
                             }
                             logger.debug("AppData updated successfully.: ", JSON.stringify(updatedData));
                         });
@@ -130,7 +158,6 @@ AppData.getAll(function(err, appDatas) {
                         AppData.update(appDatas[i]._id, appDatas[i], function(err, updatedData) {
                             if (err) {
                                 logger.debug("Error while update appdata: ", err);
-                                process.exit();
                             }
                             logger.debug("AppData updated successfully.: ", JSON.stringify(updatedData));
                         });
