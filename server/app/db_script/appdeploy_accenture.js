@@ -46,8 +46,8 @@ AppDeploy.getAppDeploy(function(err, deployedData) {
     }
     if (deployedData && deployedData.length) {
         for (var k = 0; k < deployedData.length; k++) {
-            appDeployData[k]['applicationLastDeploy'] = Date.parse(appDeployData[k]['applicationLastDeploy']);
-            AppDeploy.updateAppDeploy(appDeployData[k]._id, appDeployData[k], function(err, updatedData) {
+            deployedData[k]['applicationLastDeploy'] = Date.parse(deployedData[k].applicationLastDeploy);
+            AppDeploy.updateAppDeploy(deployedData[k]._id, deployedData[k], function(err, updatedData) {
                 if (err) {
                     logger.error("Error while updateing appdeploy: ", err);
                     process.exit();
@@ -134,12 +134,14 @@ AppData.getAll(function(err, appDatas) {
                             taskId: ""
                         };
                         appDatas[i].nexus = nexusObj;
-                        AppData.update(appDatas[i]._id, appDatas[i], function(err, updatedData) {
-                            if (err) {
-                                logger.debug("Error while update appdata: ", err);
-                            }
-                            logger.debug("AppData updated successfully.: ", JSON.stringify(updatedData));
-                        });
+                        setTimeout(function() {
+                            AppData.update(appDatas[i]._id, appDatas[i], function(err, updatedData) {
+                                if (err) {
+                                    logger.debug("Error while update appdata: ", err);
+                                }
+                                logger.debug("AppData updated successfully.: ", JSON.stringify(updatedData));
+                            });
+                        }, 10);
                     } else if (appDatas[i].docker && appDatas[i].docker.length) {
                         var dockerObj = {
                             rowId: dockerId,

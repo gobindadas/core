@@ -279,7 +279,7 @@ AppDataSchema.statics.update = function update(id, appData, callback) {
     }
     //}
 
-    that.update({
+    this.update({
         "_id": id
     }, {
         $set: setData
