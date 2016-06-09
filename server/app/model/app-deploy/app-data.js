@@ -258,5 +258,43 @@ AppDataSchema.statics.removeAll = function removeAll(callback) {
     });
 };
 
+// Get All AppData informations.
+AppDataSchema.statics.getAll = function getAll(callback) {
+    this.find(function(err, appData) {
+        if (err) {
+            logger.debug("Got error while get All appData: ", err);
+            return callback(err, null);
+        }
+        logger.debug("Got datas.");
+        return callback(null, appData);
+    });
+};
+
+AppDataSchema.statics.update = function update(id, appData, callback) {
+    var setData = {};
+    //if (existData) {
+    var keys = Object.keys(appData);
+    for (var i = 0; i < keys.length; i++) {
+        setData[keys[i]] = appData[keys[i]];
+    }
+    //}
+
+    that.update({
+        "_id": id
+    }, {
+        $set: setData
+    }, {
+        upsert: false
+    }, function(err, updatedData) {
+        if (err) {
+            logger.debug("Failed to update: ", err);
+            callback(err, null);
+            return;
+        }
+        callback(null, updatedData);
+        return;
+    });
+}
+
 var AppData = mongoose.model("appData", AppDataSchema);
 module.exports = AppData;
