@@ -60,6 +60,15 @@
                         $scope.selectedInstance = firstInstance;
                         chefLogData.instanceChange();
                     };
+                    
+                    var resetAll = function(){
+                        $scope.isInstanceListLoading = true;
+                        chefLogData.chefHistoryItem = {};
+                        chefLogData.nodeIdsWithActionLog = {};
+                        helper.stopPolling(); //Ensuring polling is stopped, eventhough the scope values for instance id and actionlog id are updated on change
+                        helper.lastTimeStamp = '';
+                    };
+                    
                     var init = function () {
                         //get the details of one chef history entry
                         workzoneServices.getTaskHistoryItem(items.taskId, items.historyId).then(function (response) {
@@ -82,7 +91,10 @@
                         } else { // if not blueprint job, use nodeIds
                             nodeIds = historyItem.nodeIds;
                         }
-                        workzoneServices.postRetrieveDetailsForInstanceNames(nodeIds).then(function (response) {
+                        var requestObj = {
+                            "instanceIds": nodeIds
+                        };
+                        workzoneServices.postRetrieveDetailsForInstanceNames(requestObj).then(function (response) {
                             var _jobInstances = response.data;
                             //if blueprint job, use blueprintExecutionResults
                             if (bluePrintJob) {
@@ -90,17 +102,16 @@
                                     bluePrintActionLogs[i].nodeId = bluePrintActionLogs[i].instanceId;
                                     for (var j = 0; j < _jobInstances.length; j++) {
                                         if (bluePrintActionLogs[i].instanceId === _jobInstances[j]._id) {
-
                                             bluePrintActionLogs[i].uiNodeName = _jobInstances[j].name;
                                         }
                                     }
                                 }
                                 nodeIdWithActionLogs = bluePrintActionLogs;
                             } else {//if not blueprint job, use nodeIdsWithActionLog
-                                for (var i = 0; i < historyItem.nodeIdsWithActionLog.length; i++) {
-                                    for (var j = 0; j < _jobInstances.length; j++) {
-                                        if (historyItem.nodeIdsWithActionLog[i].nodeId === _jobInstances[j]._id) {
-                                            historyItem.nodeIdsWithActionLog[i].uiNodeName = _jobInstances[j].name;
+                                for (var k = 0; k < historyItem.nodeIdsWithActionLog.length; k++) {
+                                    for (var l = 0; l < _jobInstances.length; l++) {
+                                        if (historyItem.nodeIdsWithActionLog[k].nodeId === _jobInstances[l]._id) {
+                                            historyItem.nodeIdsWithActionLog[k].uiNodeName = _jobInstances[l].name;
                                         }
                                     }
                                 }
@@ -166,8 +177,14 @@
                             });
                         }
                     };
-
                     init();
+
+                    // on task change event in the parent controller
+                    $scope.$on('parentChangeCompTask', function (event, args) {
+                        items = args;
+                        resetAll();
+                        init();
+                    });
 
                     return chefLogData;
                 }]);
