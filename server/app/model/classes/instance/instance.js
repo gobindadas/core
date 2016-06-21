@@ -282,6 +282,10 @@ var InstanceSchema = new Schema({
         type: String,
         required: false,
         trim: true
+    },
+    size: {
+        type: String,
+        trim: true
     }
 });
 

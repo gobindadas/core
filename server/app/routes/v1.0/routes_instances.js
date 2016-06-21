@@ -237,7 +237,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
             });
         } else {
             res.status(400).send({
-                message:"invalid instance Ids"
+                message: "invalid instance Ids"
             });
         }
     });
@@ -360,12 +360,12 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
         });
 
         function removeInstanceFromDb() {
-            containerDao.deleteContainerByInstanceId(req.params.instanceId,function(err,container){
+            containerDao.deleteContainerByInstanceId(req.params.instanceId, function(err, container) {
                 if (err) {
                     logger.error("Container deletion Failed >> ", err);
                     res.status(500).send(errorResponses.db.error);
                     return;
-                }else{
+                } else {
                     instancesDao.removeInstancebyId(req.params.instanceId, function(err, data) {
                         if (err) {
                             logger.error("Instance deletion Failed >> ", err);
@@ -575,32 +575,81 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
         var cmd = "sudo docker exec " + req.params.containerid + ' bash ' + req.params.action;
         //returning browser handle before execution starts.
         res.send(200);
+        instancesDao.getInstanceById(instanceid, function(err, instance) {
+            if (err) {
+                logger.error("Error hits getting instance: ", err);
+                res.status(500).send("Error while fetching Instance.");
+                return;
+            }
+            if (instance && instance.length) {
+                _docker.runDockerCommands(cmd, instanceid, function(err, retCode) {
+                    if (!err) {
+                        logsDao.insertLog({
+                            referenceId: instanceid,
+                            err: false,
+                            log: "Container  " + req.params.containerid + " Executed :" + req.params.action,
+                            timestamp: new Date().getTime(),
+                            orgId: instance.orgId,
+                            bgId: instance.bgId,
+                            projectId: instance.projectId,
+                            envId: instance.envId,
+                            providerIcon: "",
+                            osIcon: "",
+                            status: instance.instanceState,
+                            region: instance.region,
+                            size: instance.size,
+                            user: instance.actionLogs[0].user,
+                            cpLink: "",
+                            logIcon: ""
+                        });
+                        logger.debug("Docker Command run Successfully");
 
-        _docker.runDockerCommands(cmd, instanceid, function(err, retCode) {
-            if (!err) {
-                logsDao.insertLog({
-                    referenceId: instanceid,
-                    err: false,
-                    log: "Container  " + req.params.containerid + " Executed :" + req.params.action,
-                    timestamp: new Date().getTime()
+                        logger.debug("Exit get() for /instances/dockerexecute/%s/%s/%s", req.params.instanceid, req.params.containerid, req.params.action);
+                    } else {
+                        logger.error("Excute Error : ", err);
+                        logsDao.insertLog({
+                            referenceId: instanceid,
+                            err: true,
+                            log: "Excute Error : " + err,
+                            timestamp: new Date().getTime(),
+                            orgId: instance.orgId,
+                            bgId: instance.bgId,
+                            projectId: instance.projectId,
+                            envId: instance.envId,
+                            providerIcon: "",
+                            osIcon: "",
+                            status: instance.instanceState,
+                            region: instance.region,
+                            size: instance.size,
+                            user: instance.actionLogs[0].user,
+                            cpLink: "",
+                            logIcon: ""
+                        });
+                        logger.error("Error hit while running Docker Command: ", err);
+                        logger.debug("Exit get() for /instances/dockerexecute/%s/%s/%s", req.params.instanceid, req.params.containerid, req.params.action);
+                    }
                 });
-                logger.debug("Docker Command run Successfully");
-
-                logger.debug("Exit get() for /instances/dockerexecute/%s/%s/%s", req.params.instanceid, req.params.containerid, req.params.action);
             } else {
-                logger.error("Excute Error : ", err);
                 logsDao.insertLog({
                     referenceId: instanceid,
                     err: true,
-                    log: "Excute Error : " + err,
-                    timestamp: new Date().getTime()
+                    log: "Instance not found",
+                    timestamp: new Date().getTime(),
+                    orgId: "",
+                    bgId: "",
+                    projectId: "",
+                    envId: "",
+                    providerIcon: "",
+                    osIcon: "",
+                    status: "",
+                    region: "",
+                    size: "",
+                    user: "",
+                    cpLink: "",
+                    logIcon: ""
                 });
-                logger.error("Error hit while running Docker Command: ", err);
-                logger.debug("Exit get() for /instances/dockerexecute/%s/%s/%s", req.params.instanceid, req.params.containerid, req.params.action);
             }
         });
-
-
     });
     app.get('/instances/dockercontainerdetails/:instanceid/:containerid/:action', function(req, res) {
         var actionId = parseInt(req.params.action);
@@ -762,7 +811,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         referenceId: instanceid,
                                         err: true,
                                         log: 'Failed to Excute Docker command: . cmd : ' + cmd + '. Error: ' + err,
-                                        timestamp: new Date().getTime()
+                                        timestamp: new Date().getTime(),
+                                        orgId: data[0].orgId,
+                                        bgId: data[0].bgId,
+                                        projectId: data[0].projectId,
+                                        envId: data[0].envId,
+                                        providerIcon: "",
+                                        osIcon: "",
+                                        status: data[0].instanceState,
+                                        region: data[0].region,
+                                        size: data[0].size,
+                                        user: data[0].actionLogs[0].user,
+                                        cpLink: "",
+                                        logIcon: ""
                                     });
                                     logger.error("Failed to Excute Docker command: ", err);
                                     res.send(err);
@@ -796,7 +857,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         referenceId: instanceid,
                                         err: false,
                                         log: stdOutData.toString('ascii'),
-                                        timestamp: new Date().getTime()
+                                        timestamp: new Date().getTime(),
+                                        orgId: data[0].orgId,
+                                        bgId: data[0].bgId,
+                                        projectId: data[0].projectId,
+                                        envId: data[0].envId,
+                                        providerIcon: "",
+                                        osIcon: "",
+                                        status: data[0].instanceState,
+                                        region: data[0].region,
+                                        size: data[0].size,
+                                        user: data[0].actionLogs[0].user,
+                                        cpLink: "",
+                                        logIcon: ""
                                     });
                                     logger.debug("Docker run stdout :" + instanceid + stdOutData.toString('ascii'));
                                     stdmessages += stdOutData.toString('ascii');
@@ -807,7 +880,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     referenceId: instanceid,
                                     err: true,
                                     log: stdOutErr.toString('ascii'),
-                                    timestamp: new Date().getTime()
+                                    timestamp: new Date().getTime(),
+                                    orgId: data[0].orgId,
+                                    bgId: data[0].bgId,
+                                    projectId: data[0].projectId,
+                                    envId: data[0].envId,
+                                    providerIcon: "",
+                                    osIcon: "",
+                                    status: data[0].instanceState,
+                                    region: data[0].region,
+                                    size: data[0].size,
+                                    user: data[0].actionLogs[0].user,
+                                    cpLink: "",
+                                    logIcon: ""
                                 });
                                 logger.debug("docker return ", stdOutErr);
                                 res.send(stdOutErr);
@@ -975,7 +1060,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             referenceId: instanceid,
                                             err: true,
                                             log: 'Failed to Excute Docker command: . cmd : ' + cmd + '. Error: ' + err,
-                                            timestamp: new Date().getTime()
+                                            timestamp: new Date().getTime(),
+                                            orgId: data[0].orgId,
+                                            bgId: data[0].bgId,
+                                            projectId: data[0].projectId,
+                                            envId: data[0].envId,
+                                            providerIcon: "",
+                                            osIcon: "",
+                                            status: data[0].instanceState,
+                                            region: data[0].region,
+                                            size: data[0].size,
+                                            user: data[0].actionLogs[0].user,
+                                            cpLink: "",
+                                            logIcon: ""
                                         });
                                         logger.error("Failed to Excute Docker command: ", err);
                                         res.send(err);
@@ -991,7 +1088,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 referenceId: instanceid,
                                                 err: false,
                                                 log: 'Starting execute command: . cmd : ' + execcommand + ' on ' + containername,
-                                                timestamp: new Date().getTime()
+                                                timestamp: new Date().getTime(),
+                                                orgId: data[0].orgId,
+                                                bgId: data[0].bgId,
+                                                projectId: data[0].projectId,
+                                                envId: data[0].envId,
+                                                providerIcon: "",
+                                                osIcon: "",
+                                                status: data[0].instanceState,
+                                                region: data[0].region,
+                                                size: data[0].size,
+                                                user: data[0].actionLogs[0].user,
+                                                cpLink: "",
+                                                logIcon: ""
                                             });
                                             //Execute command found 
                                             var cmd = "sudo docker exec " + containername + ' bash ' + execcommand;
@@ -1007,7 +1116,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             referenceId: instanceid,
                                                             err: false,
                                                             log: 'Done execute command: . cmd : ' + cmd + ' on ' + containername,
-                                                            timestamp: new Date().getTime()
+                                                            timestamp: new Date().getTime(),
+                                                            orgId: data[0].orgId,
+                                                            bgId: data[0].bgId,
+                                                            projectId: data[0].projectId,
+                                                            envId: data[0].envId,
+                                                            providerIcon: "",
+                                                            osIcon: "",
+                                                            status: data[0].instanceState,
+                                                            region: data[0].region,
+                                                            size: data[0].size,
+                                                            user: data[0].actionLogs[0].user,
+                                                            cpLink: "",
+                                                            logIcon: ""
                                                         });
                                                         if (imagecount < dockercomposejson.length) {
 
@@ -1031,7 +1152,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         referenceId: instanceid,
                                                         err: true,
                                                         log: 'Error executing command: . cmd : ' + cmd + ' on ' + containername + ' : Return Code ' + retCode1 + ' -' + err,
-                                                        timestamp: new Date().getTime()
+                                                        timestamp: new Date().getTime(),
+                                                        orgId: data[0].orgId,
+                                                        bgId: data[0].bgId,
+                                                        projectId: data[0].projectId,
+                                                        envId: data[0].envId,
+                                                        providerIcon: "",
+                                                        osIcon: "",
+                                                        status: data[0].instanceState,
+                                                        region: data[0].region,
+                                                        size: data[0].size,
+                                                        user: data[0].actionLogs[0].user,
+                                                        cpLink: "",
+                                                        logIcon: ""
                                                     });
                                                 }
 
@@ -1044,7 +1177,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: instanceid,
                                                     err: false,
                                                     log: 'Done image pull and run.',
-                                                    timestamp: new Date().getTime()
+                                                    timestamp: new Date().getTime(),
+                                                    orgId: data[0].orgId,
+                                                    bgId: data[0].bgId,
+                                                    projectId: data[0].projectId,
+                                                    envId: data[0].envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: data[0].instanceState,
+                                                    region: data[0].region,
+                                                    size: data[0].size,
+                                                    user: data[0].actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 if (imagecount < dockercomposejson.length) {
 
@@ -1083,7 +1228,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             referenceId: instanceid,
                                             err: false,
                                             log: stdOutData.toString('ascii'),
-                                            timestamp: new Date().getTime()
+                                            timestamp: new Date().getTime(),
+                                            orgId: data[0].orgId,
+                                            bgId: data[0].bgId,
+                                            projectId: data[0].projectId,
+                                            envId: data[0].envId,
+                                            providerIcon: "",
+                                            osIcon: "",
+                                            status: data[0].instanceState,
+                                            region: data[0].region,
+                                            size: data[0].size,
+                                            user: data[0].actionLogs[0].user,
+                                            cpLink: "",
+                                            logIcon: ""
                                         });
                                         logger.debug("Docker run stdout :" + instanceid + stdOutData.toString('ascii'));
                                         stdmessages += stdOutData.toString('ascii');
@@ -1094,7 +1251,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         referenceId: instanceid,
                                         err: true,
                                         log: stdOutErr.toString('ascii'),
-                                        timestamp: new Date().getTime()
+                                        timestamp: new Date().getTime(),
+                                        orgId: data[0].orgId,
+                                        bgId: data[0].bgId,
+                                        projectId: data[0].projectId,
+                                        envId: data[0].envId,
+                                        providerIcon: "",
+                                        osIcon: "",
+                                        status: data[0].instanceState,
+                                        region: data[0].region,
+                                        size: data[0].size,
+                                        user: data[0].actionLogs[0].user,
+                                        cpLink: "",
+                                        logIcon: ""
                                     });
                                     logger.debug("docker return ", stdOutErr);
                                 });
@@ -1184,7 +1353,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         referenceId: logReferenceIds,
                                         err: true,
                                         log: "Unable to get infraManager data. client run failed",
-                                        timestamp: timestampEnded
+                                        timestamp: timestampEnded,
+                                        orgId: instance.orgId,
+                                        bgId: instance.bgId,
+                                        projectId: instance.projectId,
+                                        envId: instance.envId,
+                                        providerIcon: "",
+                                        osIcon: "",
+                                        status: instance.instanceState,
+                                        region: instance.region,
+                                        size: instance.size,
+                                        user: instance.actionLogs[0].user,
+                                        cpLink: "",
+                                        logIcon: ""
                                     });
                                     instancesDao.updateActionLog(instance.id, actionLog._id, false, timestampEnded);
                                     res.send(200, {
@@ -1198,7 +1379,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         referenceId: logReferenceIds,
                                         err: true,
                                         log: "InfraManager information is corrupt. client run failed",
-                                        timestamp: timestampEnded
+                                        timestamp: timestampEnded,
+                                        orgId: instance.orgId,
+                                        bgId: instance.bgId,
+                                        projectId: instance.projectId,
+                                        envId: instance.envId,
+                                        providerIcon: "",
+                                        osIcon: "",
+                                        status: instance.instanceState,
+                                        region: instance.region,
+                                        size: instance.size,
+                                        user: instance.actionLogs[0].user,
+                                        cpLink: "",
+                                        logIcon: ""
                                     });
                                     instancesDao.updateActionLog(instance.id, actionLog._id, false, timestampEnded);
 
@@ -1216,7 +1409,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             referenceId: logReferenceIds,
                                             err: true,
                                             log: "Unable to decrypt pem file. client run failed",
-                                            timestamp: timestampEnded
+                                            timestamp: timestampEnded,
+                                            orgId: instance.orgId,
+                                            bgId: instance.bgId,
+                                            projectId: instance.projectId,
+                                            envId: instance.envId,
+                                            providerIcon: "",
+                                            osIcon: "",
+                                            status: instance.instanceState,
+                                            region: instance.region,
+                                            size: instance.size,
+                                            user: instance.actionLogs[0].user,
+                                            cpLink: "",
+                                            logIcon: ""
                                         });
                                         instancesDao.updateActionLog(instance.id, actionLog._id, false, timestampEnded);
                                         return;
@@ -1233,7 +1438,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 referenceId: logReferenceIds,
                                                 err: true,
                                                 log: "Unable to generate client run execution id. client run failed",
-                                                timestamp: timestampEnded
+                                                timestamp: timestampEnded,
+                                                orgId: instance.orgId,
+                                                bgId: instance.bgId,
+                                                projectId: instance.projectId,
+                                                envId: instance.envId,
+                                                providerIcon: "",
+                                                osIcon: "",
+                                                status: instance.instanceState,
+                                                region: instance.region,
+                                                size: instance.size,
+                                                user: instance.actionLogs[0].user,
+                                                cpLink: "",
+                                                logIcon: ""
                                             });
                                             instancesDao.updateActionLog(instance.id, actionLog._id, false, timestampEnded);
                                             return;
@@ -1316,7 +1533,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             referenceId: logReferenceIds,
                                             err: false,
                                             log: 'Running client on the node',
-                                            timestamp: new Date().getTime()
+                                            timestamp: new Date().getTime(),
+                                            orgId: instance.orgId,
+                                            bgId: instance.bgId,
+                                            projectId: instance.projectId,
+                                            envId: instance.envId,
+                                            providerIcon: "",
+                                            osIcon: "",
+                                            status: instance.instanceState,
+                                            region: instance.region,
+                                            size: instance.size,
+                                            user: instance.actionLogs[0].user,
+                                            cpLink: "",
+                                            logIcon: ""
                                         });
                                         infraManager.runClient(runOptions, function(err, retCode) {
                                             if (decryptedCredentials.pemFileLocation) {
@@ -1335,7 +1564,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: true,
                                                     log: "Unable to run client",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateActionLog(instance.id, actionLog._id, false, timestampEnded);
                                                 return;
@@ -1355,7 +1596,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             referenceId: logReferenceIds,
                                                             err: false,
                                                             log: 'instance runlist updated',
-                                                            timestamp: timestampEnded
+                                                            timestamp: timestampEnded,
+                                                            orgId: instance.orgId,
+                                                            bgId: instance.bgId,
+                                                            projectId: instance.projectId,
+                                                            envId: instance.envId,
+                                                            providerIcon: "",
+                                                            osIcon: "",
+                                                            status: instance.instanceState,
+                                                            region: instance.region,
+                                                            size: instance.size,
+                                                            user: instance.actionLogs[0].user,
+                                                            cpLink: "",
+                                                            logIcon: ""
                                                         });
                                                         instancesDao.updateActionLog(instance.id, actionLog._id, true, timestampEnded);
 
@@ -1391,7 +1644,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         referenceId: logReferenceIds,
                                                         err: false,
                                                         log: 'puppet client ran successfully',
-                                                        timestamp: timestampEnded
+                                                        timestamp: timestampEnded,
+                                                        orgId: instance.orgId,
+                                                        bgId: instance.bgId,
+                                                        projectId: instance.projectId,
+                                                        envId: instance.envId,
+                                                        providerIcon: "",
+                                                        osIcon: "",
+                                                        status: instance.instanceState,
+                                                        region: instance.region,
+                                                        size: instance.size,
+                                                        user: instance.actionLogs[0].user,
+                                                        cpLink: "",
+                                                        logIcon: ""
                                                     });
                                                     instancesDao.updateActionLog(instance.id, actionLog._id, true, timestampEnded);
                                                 }
@@ -1401,14 +1666,38 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         referenceId: logReferenceIds,
                                                         err: true,
                                                         log: 'Host Unreachable',
-                                                        timestamp: new Date().getTime()
+                                                        timestamp: new Date().getTime(),
+                                                        orgId: instance.orgId,
+                                                        bgId: instance.bgId,
+                                                        projectId: instance.projectId,
+                                                        envId: instance.envId,
+                                                        providerIcon: "",
+                                                        osIcon: "",
+                                                        status: instance.instanceState,
+                                                        region: instance.region,
+                                                        size: instance.size,
+                                                        user: instance.actionLogs[0].user,
+                                                        cpLink: "",
+                                                        logIcon: ""
                                                     });
                                                 } else if (retCode === -5001) {
                                                     logsDao.insertLog({
                                                         referenceId: logReferenceIds,
                                                         err: true,
                                                         log: 'Invalid credentials',
-                                                        timestamp: new Date().getTime()
+                                                        timestamp: new Date().getTime(),
+                                                        orgId: instance.orgId,
+                                                        bgId: instance.bgId,
+                                                        projectId: instance.projectId,
+                                                        envId: instance.envId,
+                                                        providerIcon: "",
+                                                        osIcon: "",
+                                                        status: instance.instanceState,
+                                                        region: instance.region,
+                                                        size: instance.size,
+                                                        user: instance.actionLogs[0].user,
+                                                        cpLink: "",
+                                                        logIcon: ""
                                                     });
 
                                                 } else {
@@ -1416,7 +1705,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         referenceId: logReferenceIds,
                                                         err: true,
                                                         log: 'Unknown error occured. ret code = ' + retCode,
-                                                        timestamp: new Date().getTime()
+                                                        timestamp: new Date().getTime(),
+                                                        orgId: instance.orgId,
+                                                        bgId: instance.bgId,
+                                                        projectId: instance.projectId,
+                                                        envId: instance.envId,
+                                                        providerIcon: "",
+                                                        osIcon: "",
+                                                        status: instance.instanceState,
+                                                        region: instance.region,
+                                                        size: instance.size,
+                                                        user: instance.actionLogs[0].user,
+                                                        cpLink: "",
+                                                        logIcon: ""
                                                     });
 
                                                 }
@@ -1425,7 +1726,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: true,
                                                     log: 'Unable to run client',
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateActionLog(instance.id, actionLog._id, false, timestampEnded);
                                                 return;
@@ -1435,7 +1748,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 referenceId: logReferenceIds,
                                                 err: false,
                                                 log: stdOutData.toString('ascii'),
-                                                timestamp: new Date().getTime()
+                                                timestamp: new Date().getTime(),
+                                                orgId: instance.orgId,
+                                                bgId: instance.bgId,
+                                                projectId: instance.projectId,
+                                                envId: instance.envId,
+                                                providerIcon: "",
+                                                osIcon: "",
+                                                status: instance.instanceState,
+                                                region: instance.region,
+                                                size: instance.size,
+                                                user: instance.actionLogs[0].user,
+                                                cpLink: "",
+                                                logIcon: ""
                                             });
 
                                         }, function(stdOutErr) {
@@ -1443,7 +1768,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 referenceId: logReferenceIds,
                                                 err: true,
                                                 log: stdOutErr.toString('ascii'),
-                                                timestamp: new Date().getTime()
+                                                timestamp: new Date().getTime(),
+                                                orgId: instance.orgId,
+                                                bgId: instance.bgId,
+                                                projectId: instance.projectId,
+                                                envId: instance.envId,
+                                                providerIcon: "",
+                                                osIcon: "",
+                                                status: instance.instanceState,
+                                                region: instance.region,
+                                                size: instance.size,
+                                                user: instance.actionLogs[0].user,
+                                                cpLink: "",
+                                                logIcon: ""
                                             });
                                         });
                                         res.send(200, {
@@ -1487,6 +1824,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                         }
                         logger.debug("data.providerId: ::::   ", JSON.stringify(data[0]));
                         if (data.length) {
+                            var instance = data[0];
                             var timestampStarted = new Date().getTime();
 
                             var actionLog = instancesDao.insertStopActionLog(req.params.instanceId, req.session.user.cn, timestampStarted);
@@ -1499,7 +1837,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 referenceId: logReferenceIds,
                                 err: false,
                                 log: "Instance Stopping",
-                                timestamp: timestampStarted
+                                timestamp: timestampStarted,
+                                orgId: instance.orgId,
+                                bgId: instance.bgId,
+                                projectId: instance.projectId,
+                                envId: instance.envId,
+                                providerIcon: "",
+                                osIcon: "",
+                                status: instance.instanceState,
+                                region: instance.region,
+                                size: instance.size,
+                                user: instance.actionLogs[0].user,
+                                cpLink: "",
+                                logIcon: ""
                             });
 
                             if (!data[0].providerId) {
@@ -1510,7 +1860,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     referenceId: logReferenceIds,
                                     err: true,
                                     log: "Insufficient provider details, to complete the operation",
-                                    timestamp: new Date().getTime()
+                                    timestamp: new Date().getTime(),
+                                    orgId: instance.orgId,
+                                    bgId: instance.bgId,
+                                    projectId: instance.projectId,
+                                    envId: instance.envId,
+                                    providerIcon: "",
+                                    osIcon: "",
+                                    status: instance.instanceState,
+                                    region: instance.region,
+                                    size: instance.size,
+                                    user: instance.actionLogs[0].user,
+                                    cpLink: "",
+                                    logIcon: ""
                                 });
                                 return;
                             }
@@ -1549,7 +1911,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: false,
                                                     log: "Instance Stopping",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateInstanceState(req.params.instanceId, 'stopped', function(err, updateCount) {
                                                     if (err) {
@@ -1565,7 +1939,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: false,
                                                     log: "Instance Stopped",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateActionLog(req.params.instanceId, actionLog._id, true, timestampEnded);
                                                 res.send(200, {
@@ -1580,7 +1966,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: true,
                                                     log: "Unable to stop instance",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 res.send('500', null);
                                                 return;
@@ -1600,7 +1998,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     referenceId: logReferenceIds,
                                     err: true,
                                     log: "Unable to stop openstack instance",
-                                    timestamp: timestampEnded
+                                    timestamp: timestampEnded,
+                                    orgId: instance.orgId,
+                                    bgId: instance.bgId,
+                                    projectId: instance.projectId,
+                                    envId: instance.envId,
+                                    providerIcon: "",
+                                    osIcon: "",
+                                    status: instance.instanceState,
+                                    region: instance.region,
+                                    size: instance.size,
+                                    user: instance.actionLogs[0].user,
+                                    cpLink: "",
+                                    logIcon: ""
                                 });
                                 res.status(500).send({
                                     message: "Unable to stop openstack instance "
@@ -1661,7 +2071,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             referenceId: logReferenceIds,
                                                             err: true,
                                                             log: "Unable to stop instance",
-                                                            timestamp: timestampEnded
+                                                            timestamp: timestampEnded,
+                                                            orgId: instance.orgId,
+                                                            bgId: instance.bgId,
+                                                            projectId: instance.projectId,
+                                                            envId: instance.envId,
+                                                            providerIcon: "",
+                                                            osIcon: "",
+                                                            status: instance.instanceState,
+                                                            region: instance.region,
+                                                            size: instance.size,
+                                                            user: instance.actionLogs[0].user,
+                                                            cpLink: "",
+                                                            logIcon: ""
                                                         });
                                                         instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
                                                         res.status(500).send({
@@ -1705,7 +2127,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         referenceId: logReferenceIds,
                                                         err: false,
                                                         log: "Instance Stopped",
-                                                        timestamp: timestampEnded
+                                                        timestamp: timestampEnded,
+                                                        orgId: instance.orgId,
+                                                        bgId: instance.bgId,
+                                                        projectId: instance.projectId,
+                                                        envId: instance.envId,
+                                                        providerIcon: "",
+                                                        osIcon: "",
+                                                        status: instance.instanceState,
+                                                        region: instance.region,
+                                                        size: instance.size,
+                                                        user: instance.actionLogs[0].user,
+                                                        cpLink: "",
+                                                        logIcon: ""
                                                     });
 
                                                     instancesDao.updateActionLog(req.params.instanceId, actionLog._id, true, timestampEnded);
@@ -1759,7 +2193,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: true,
                                                     log: "Unable to stop instance",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
                                                 fs.unlink('/tmp/' + provider.id + '.json', function(err) {
@@ -1792,7 +2238,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 referenceId: logReferenceIds,
                                                 err: false,
                                                 log: "Instance Stopped",
-                                                timestamp: timestampEnded
+                                                timestamp: timestampEnded,
+                                                orgId: instance.orgId,
+                                                bgId: instance.bgId,
+                                                projectId: instance.projectId,
+                                                envId: instance.envId,
+                                                providerIcon: "",
+                                                osIcon: "",
+                                                status: instance.instanceState,
+                                                region: instance.region,
+                                                size: instance.size,
+                                                user: instance.actionLogs[0].user,
+                                                cpLink: "",
+                                                logIcon: ""
                                             });
                                             res.send(200, {
                                                 instanceCurrentState: "stopped",
@@ -1868,7 +2326,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: true,
                                                     log: "Unable to stop instance",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
                                                 res.status(500).send({
@@ -1907,7 +2377,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 referenceId: logReferenceIds,
                                                 err: false,
                                                 log: "Instance Stopped",
-                                                timestamp: timestampEnded
+                                                timestamp: timestampEnded,
+                                                orgId: instance.orgId,
+                                                bgId: instance.bgId,
+                                                projectId: instance.projectId,
+                                                envId: instance.envId,
+                                                providerIcon: "",
+                                                osIcon: "",
+                                                status: instance.instanceState,
+                                                region: instance.region,
+                                                size: instance.size,
+                                                user: instance.actionLogs[0].user,
+                                                cpLink: "",
+                                                logIcon: ""
                                             });
                                             instancesDao.updateActionLog(req.params.instanceId, actionLog._id, true, timestampEnded);
 
@@ -1947,6 +2429,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             return;
                         }
                         if (data.length) {
+                            var instance = data[0];
                             if (data[0].providerType && data[0].providerType == 'vmware') {
                                 vmwareCloudProvider.getvmwareProviderById(data[0].providerId, function(err, providerdata) {
                                     var timestampStarted = new Date().getTime();
@@ -1986,7 +2469,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: false,
                                                     log: "Instance Starting",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateInstanceState(req.params.instanceId, 'running', function(err, updateCount) {
                                                     if (err) {
@@ -2002,7 +2497,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: false,
                                                     log: "Instance Started",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateActionLog(req.params.instanceId, actionLog._id, true, timestampEnded);
                                                 res.send(200, {
@@ -2017,7 +2524,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: true,
                                                     log: "Unable to start instance",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 res.send('500', null);
                                                 return;
@@ -2047,7 +2566,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     referenceId: logReferenceIds,
                                     err: false,
                                     log: "Instance Starting",
-                                    timestamp: timestampStarted
+                                    timestamp: timestampStarted,
+                                    orgId: instance.orgId,
+                                    bgId: instance.bgId,
+                                    projectId: instance.projectId,
+                                    envId: instance.envId,
+                                    providerIcon: "",
+                                    osIcon: "",
+                                    status: instance.instanceState,
+                                    region: instance.region,
+                                    size: instance.size,
+                                    user: instance.actionLogs[0].user,
+                                    cpLink: "",
+                                    logIcon: ""
                                 });
 
                                 if (!data[0].providerId) {
@@ -2058,7 +2589,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         referenceId: logReferenceIds,
                                         err: true,
                                         log: "Insufficient provider details, to complete the operation",
-                                        timestamp: new Date().getTime()
+                                        timestamp: new Date().getTime(),
+                                        orgId: instance.orgId,
+                                        bgId: instance.bgId,
+                                        projectId: instance.projectId,
+                                        envId: instance.envId,
+                                        providerIcon: "",
+                                        osIcon: "",
+                                        status: instance.instanceState,
+                                        region: instance.region,
+                                        size: instance.size,
+                                        user: instance.actionLogs[0].user,
+                                        cpLink: "",
+                                        logIcon: ""
                                     });
                                     return;
                                 }
@@ -2115,7 +2658,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             referenceId: logReferenceIds,
                                                             err: true,
                                                             log: "Unable to start instance",
-                                                            timestamp: timestampEnded
+                                                            timestamp: timestampEnded,
+                                                            orgId: instance.orgId,
+                                                            bgId: instance.bgId,
+                                                            projectId: instance.projectId,
+                                                            envId: instance.envId,
+                                                            providerIcon: "",
+                                                            osIcon: "",
+                                                            status: instance.instanceState,
+                                                            region: instance.region,
+                                                            size: instance.size,
+                                                            user: instance.actionLogs[0].user,
+                                                            cpLink: "",
+                                                            logIcon: ""
                                                         });
                                                         instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
                                                         res.status(500).send({
@@ -2159,7 +2714,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         referenceId: logReferenceIds,
                                                         err: false,
                                                         log: "Instance Started",
-                                                        timestamp: timestampEnded
+                                                        timestamp: timestampEnded,
+                                                        orgId: instance.orgId,
+                                                        bgId: instance.bgId,
+                                                        projectId: instance.projectId,
+                                                        envId: instance.envId,
+                                                        providerIcon: "",
+                                                        osIcon: "",
+                                                        status: instance.instanceState,
+                                                        region: instance.region,
+                                                        size: instance.size,
+                                                        user: instance.actionLogs[0].user,
+                                                        cpLink: "",
+                                                        logIcon: ""
                                                     });
 
                                                     instancesDao.updateActionLog(req.params.instanceId, actionLog._id, true, timestampEnded);
@@ -2220,7 +2787,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         referenceId: logReferenceIds,
                                         err: false,
                                         log: "Instance Starting",
-                                        timestamp: timestampStarted
+                                        timestamp: timestampStarted,
+                                        orgId: instance.orgId,
+                                        bgId: instance.bgId,
+                                        projectId: instance.projectId,
+                                        envId: instance.envId,
+                                        providerIcon: "",
+                                        osIcon: "",
+                                        status: instance.instanceState,
+                                        region: instance.region,
+                                        size: instance.size,
+                                        user: instance.actionLogs[0].user,
+                                        cpLink: "",
+                                        logIcon: ""
                                     });
 
                                     gcp.startVM(gcpParam, function(err, vmResponse) {
@@ -2231,7 +2810,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: true,
                                                     log: "Unable to start instance",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
                                                 fs.unlink('/tmp/' + provider.id + '.json', function(err) {
@@ -2268,7 +2859,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 referenceId: logReferenceIds,
                                                 err: false,
                                                 log: "Instance Started",
-                                                timestamp: timestampEnded
+                                                timestamp: timestampEnded,
+                                                orgId: instance.orgId,
+                                                bgId: instance.bgId,
+                                                projectId: instance.projectId,
+                                                envId: instance.envId,
+                                                providerIcon: "",
+                                                osIcon: "",
+                                                status: instance.instanceState,
+                                                region: instance.region,
+                                                size: instance.size,
+                                                user: instance.actionLogs[0].user,
+                                                cpLink: "",
+                                                logIcon: ""
                                             });
                                             instancesDao.updateActionLog(req.params.instanceId, actionLog._id, true, timestampEnded);
                                             fs.unlink('/tmp/' + provider.id + '.json', function(err) {
@@ -2324,7 +2927,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             referenceId: logReferenceIds,
                                             err: false,
                                             log: "Instance Starting",
-                                            timestamp: timestampStarted
+                                            timestamp: timestampStarted,
+                                            orgId: instance.orgId,
+                                            bgId: instance.bgId,
+                                            projectId: instance.projectId,
+                                            envId: instance.envId,
+                                            providerIcon: "",
+                                            osIcon: "",
+                                            status: instance.instanceState,
+                                            region: instance.region,
+                                            size: instance.size,
+                                            user: instance.actionLogs[0].user,
+                                            cpLink: "",
+                                            logIcon: ""
                                         });
 
                                         var ec2;
@@ -2357,7 +2972,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     referenceId: logReferenceIds,
                                                     err: true,
                                                     log: "Unable to start instance",
-                                                    timestamp: timestampEnded
+                                                    timestamp: timestampEnded,
+                                                    orgId: instance.orgId,
+                                                    bgId: instance.bgId,
+                                                    projectId: instance.projectId,
+                                                    envId: instance.envId,
+                                                    providerIcon: "",
+                                                    osIcon: "",
+                                                    status: instance.instanceState,
+                                                    region: instance.region,
+                                                    size: instance.size,
+                                                    user: instance.actionLogs[0].user,
+                                                    cpLink: "",
+                                                    logIcon: ""
                                                 });
                                                 instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
                                                 res.status(500).send({
@@ -2395,7 +3022,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 referenceId: logReferenceIds,
                                                 err: false,
                                                 log: "Instance Started",
-                                                timestamp: timestampEnded
+                                                timestamp: timestampEnded,
+                                                orgId: instance.orgId,
+                                                bgId: instance.bgId,
+                                                projectId: instance.projectId,
+                                                envId: instance.envId,
+                                                providerIcon: "",
+                                                osIcon: "",
+                                                status: instance.instanceState,
+                                                region: instance.region,
+                                                size: instance.size,
+                                                user: instance.actionLogs[0].user,
+                                                cpLink: "",
+                                                logIcon: ""
                                             });
                                             instancesDao.updateActionLog(req.params.instanceId, actionLog._id, true, timestampEnded);
 
@@ -2559,7 +3198,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             referenceId: logReferenceIds,
                             err: true,
                             log: 'Unable to run services',
-                            timestamp: timestampEnded
+                            timestamp: timestampEnded,
+                            orgId: instance.orgId,
+                            bgId: instance.bgId,
+                            projectId: instance.projectId,
+                            envId: instance.envId,
+                            providerIcon: "",
+                            osIcon: "",
+                            status: instance.instanceState,
+                            region: instance.region,
+                            size: instance.size,
+                            user: instance.actionLogs[0].user,
+                            cpLink: "",
+                            logIcon: ""
                         });
                         instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
                         return;
@@ -2572,7 +3223,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             referenceId: logReferenceIds,
                             err: false,
                             log: 'Service run success',
-                            timestamp: timestampEnded
+                            timestamp: timestampEnded,
+                            orgId: instance.orgId,
+                            bgId: instance.bgId,
+                            projectId: instance.projectId,
+                            envId: instance.envId,
+                            providerIcon: "",
+                            osIcon: "",
+                            status: instance.instanceState,
+                            region: instance.region,
+                            size: instance.size,
+                            user: instance.actionLogs[0].user,
+                            cpLink: "",
+                            logIcon: ""
                         });
                         instancesDao.updateActionLog(req.params.instanceId, actionLog._id, true, timestampEnded);
                     } else {
@@ -2582,21 +3245,57 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 referenceId: logReferenceIds,
                                 err: true,
                                 log: 'Host Unreachable',
-                                timestamp: timestampEnded
+                                timestamp: timestampEnded,
+                                orgId: instance.orgId,
+                                bgId: instance.bgId,
+                                projectId: instance.projectId,
+                                envId: instance.envId,
+                                providerIcon: "",
+                                osIcon: "",
+                                status: instance.instanceState,
+                                region: instance.region,
+                                size: instance.size,
+                                user: instance.actionLogs[0].user,
+                                cpLink: "",
+                                logIcon: ""
                             });
                         } else if (retCode === -5001) {
                             logsDao.insertLog({
                                 referenceId: logReferenceIds,
                                 err: true,
                                 log: 'Invalid credentials',
-                                timestamp: timestampEnded
+                                timestamp: timestampEnded,
+                                orgId: instance.orgId,
+                                bgId: instance.bgId,
+                                projectId: instance.projectId,
+                                envId: instance.envId,
+                                providerIcon: "",
+                                osIcon: "",
+                                status: instance.instanceState,
+                                region: instance.region,
+                                size: instance.size,
+                                user: instance.actionLogs[0].user,
+                                cpLink: "",
+                                logIcon: ""
                             });
                         } else {
                             logsDao.insertLog({
                                 referenceId: logReferenceIds,
                                 err: true,
                                 log: 'Unknown error occured. ret code = ' + retCode,
-                                timestamp: timestampEnded
+                                timestamp: timestampEnded,
+                                orgId: instance.orgId,
+                                bgId: instance.bgId,
+                                projectId: instance.projectId,
+                                envId: instance.envId,
+                                providerIcon: "",
+                                osIcon: "",
+                                status: instance.instanceState,
+                                region: instance.region,
+                                size: instance.size,
+                                user: instance.actionLogs[0].user,
+                                cpLink: "",
+                                logIcon: ""
                             });
                         }
                         timestampEnded = new Date().getTime();
@@ -2604,7 +3303,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             referenceId: logReferenceIds,
                             err: true,
                             log: 'Unable to run services',
-                            timestamp: timestampEnded
+                            timestamp: timestampEnded,
+                            orgId: instance.orgId,
+                            bgId: instance.bgId,
+                            projectId: instance.projectId,
+                            envId: instance.envId,
+                            providerIcon: "",
+                            osIcon: "",
+                            status: instance.instanceState,
+                            region: instance.region,
+                            size: instance.size,
+                            user: instance.actionLogs[0].user,
+                            cpLink: "",
+                            logIcon: ""
                         });
                         instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
 
@@ -2616,7 +3327,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                         referenceId: logReferenceIds,
                         err: false,
                         log: stdOutData.toString('ascii'),
-                        timestamp: new Date().getTime()
+                        timestamp: new Date().getTime(),
+                        orgId: instance.orgId,
+                        bgId: instance.bgId,
+                        projectId: instance.projectId,
+                        envId: instance.envId,
+                        providerIcon: "",
+                        osIcon: "",
+                        status: instance.instanceState,
+                        region: instance.region,
+                        size: instance.size,
+                        user: instance.actionLogs[0].user,
+                        cpLink: "",
+                        logIcon: ""
                     });
                 }
 
@@ -2625,7 +3348,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                         referenceId: logReferenceIds,
                         err: true,
                         log: stdOutErr.toString('ascii'),
-                        timestamp: new Date().getTime()
+                        timestamp: new Date().getTime(),
+                        orgId: instance.orgId,
+                        bgId: instance.bgId,
+                        projectId: instance.projectId,
+                        envId: instance.envId,
+                        providerIcon: "",
+                        osIcon: "",
+                        status: instance.instanceState,
+                        region: instance.region,
+                        size: instance.size,
+                        user: instance.actionLogs[0].user,
+                        cpLink: "",
+                        logIcon: ""
                     });
                 }
                 credentialCryptography.decryptCredential(instance.credentials, function(err, decryptedCredentials) {
@@ -2636,7 +3371,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             referenceId: logReferenceIds,
                             err: true,
                             log: 'Unable to decrypt credentials. Unable to run service',
-                            timestamp: timestampEnded
+                            timestamp: timestampEnded,
+                            orgId: instance.orgId,
+                            bgId: instance.bgId,
+                            projectId: instance.projectId,
+                            envId: instance.envId,
+                            providerIcon: "",
+                            osIcon: "",
+                            status: instance.instanceState,
+                            region: instance.region,
+                            size: instance.size,
+                            user: instance.actionLogs[0].user,
+                            cpLink: "",
+                            logIcon: ""
                         });
                         instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
 
@@ -2653,7 +3400,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     referenceId: logReferenceIds,
                                     err: true,
                                     log: 'Chef Data corrupted. Unable to run service',
-                                    timestamp: timestampEnded
+                                    timestamp: timestampEnded,
+                                    orgId: instance.orgId,
+                                    bgId: instance.bgId,
+                                    projectId: instance.projectId,
+                                    envId: instance.envId,
+                                    providerIcon: "",
+                                    osIcon: "",
+                                    status: instance.instanceState,
+                                    region: instance.region,
+                                    size: instance.size,
+                                    user: instance.actionLogs[0].user,
+                                    cpLink: "",
+                                    logIcon: ""
                                 });
                                 instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
 
@@ -2668,7 +3427,19 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     referenceId: logReferenceIds,
                                     err: true,
                                     log: 'Chef Data corrupted. Unable to run service',
-                                    timestamp: timestampEnded
+                                    timestamp: timestampEnded,
+                                    orgId: instance.orgId,
+                                    bgId: instance.bgId,
+                                    projectId: instance.projectId,
+                                    envId: instance.envId,
+                                    providerIcon: "",
+                                    osIcon: "",
+                                    status: instance.instanceState,
+                                    region: instance.region,
+                                    size: instance.size,
+                                    user: instance.actionLogs[0].user,
+                                    cpLink: "",
+                                    logIcon: ""
                                 });
                                 instancesDao.updateActionLog(req.params.instanceId, actionLog._id, false, timestampEnded);
 

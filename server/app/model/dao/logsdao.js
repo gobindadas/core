@@ -24,7 +24,19 @@ var LogSchema = new Schema({
     referenceId: [String],
     err: Boolean,
     log: String,
-    timestamp: Number
+    timestamp: Number,
+    orgId: String, // instance
+    bgId: String, // instance
+    projectId: String, // instance
+    envId: String, // instance
+    providerIcon: String,
+    osIcon: String,
+    status: String, // instance
+    region: String, // instance
+    size: String, // blueprint
+    user: String, // instance.actionLogs[0].user
+    cpLink: String,
+    logIcon: String
 });
 var Logs = mongoose.model('logs', LogSchema);
 
