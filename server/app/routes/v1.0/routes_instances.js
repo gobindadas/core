@@ -589,6 +589,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             err: false,
                             log: "Container  " + req.params.containerid + " Executed :" + req.params.action,
                             timestamp: new Date().getTime(),
+                            instanceId: instance.platformId,
                             orgId: instance.orgId,
                             bgId: instance.bgId,
                             projectId: instance.projectId,
@@ -612,6 +613,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             err: true,
                             log: "Excute Error : " + err,
                             timestamp: new Date().getTime(),
+                            instanceId: instance.platformId,
                             orgId: instance.orgId,
                             bgId: instance.bgId,
                             projectId: instance.projectId,
@@ -635,6 +637,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                     err: true,
                     log: "Instance not found",
                     timestamp: new Date().getTime(),
+                    instanceId: "",
                     orgId: "",
                     bgId: "",
                     projectId: "",
@@ -812,6 +815,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         err: true,
                                         log: 'Failed to Excute Docker command: . cmd : ' + cmd + '. Error: ' + err,
                                         timestamp: new Date().getTime(),
+                                        instanceId: data[0].platformId,
                                         orgId: data[0].orgId,
                                         bgId: data[0].bgId,
                                         projectId: data[0].projectId,
@@ -858,6 +862,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         err: false,
                                         log: stdOutData.toString('ascii'),
                                         timestamp: new Date().getTime(),
+                                        instanceId: data[0].platformId,
                                         orgId: data[0].orgId,
                                         bgId: data[0].bgId,
                                         projectId: data[0].projectId,
@@ -881,6 +886,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     err: true,
                                     log: stdOutErr.toString('ascii'),
                                     timestamp: new Date().getTime(),
+                                    instanceId: data[0].platformId,
                                     orgId: data[0].orgId,
                                     bgId: data[0].bgId,
                                     projectId: data[0].projectId,
@@ -1061,6 +1067,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             err: true,
                                             log: 'Failed to Excute Docker command: . cmd : ' + cmd + '. Error: ' + err,
                                             timestamp: new Date().getTime(),
+                                            instanceId: data[0].platformId,
                                             orgId: data[0].orgId,
                                             bgId: data[0].bgId,
                                             projectId: data[0].projectId,
@@ -1089,6 +1096,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 err: false,
                                                 log: 'Starting execute command: . cmd : ' + execcommand + ' on ' + containername,
                                                 timestamp: new Date().getTime(),
+                                                instanceId: data[0].platformId,
                                                 orgId: data[0].orgId,
                                                 bgId: data[0].bgId,
                                                 projectId: data[0].projectId,
@@ -1117,6 +1125,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             err: false,
                                                             log: 'Done execute command: . cmd : ' + cmd + ' on ' + containername,
                                                             timestamp: new Date().getTime(),
+                                                            instanceId: data[0].platformId,
                                                             orgId: data[0].orgId,
                                                             bgId: data[0].bgId,
                                                             projectId: data[0].projectId,
@@ -1153,6 +1162,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         err: true,
                                                         log: 'Error executing command: . cmd : ' + cmd + ' on ' + containername + ' : Return Code ' + retCode1 + ' -' + err,
                                                         timestamp: new Date().getTime(),
+                                                        instanceId: data[0].platformId,
                                                         orgId: data[0].orgId,
                                                         bgId: data[0].bgId,
                                                         projectId: data[0].projectId,
@@ -1178,6 +1188,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: false,
                                                     log: 'Done image pull and run.',
                                                     timestamp: new Date().getTime(),
+                                                    instanceId: data[0].platformId,
                                                     orgId: data[0].orgId,
                                                     bgId: data[0].bgId,
                                                     projectId: data[0].projectId,
@@ -1229,6 +1240,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             err: false,
                                             log: stdOutData.toString('ascii'),
                                             timestamp: new Date().getTime(),
+                                            instanceId: data[0].platformId,
                                             orgId: data[0].orgId,
                                             bgId: data[0].bgId,
                                             projectId: data[0].projectId,
@@ -1252,6 +1264,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         err: true,
                                         log: stdOutErr.toString('ascii'),
                                         timestamp: new Date().getTime(),
+                                        instanceId: data[0].platformId,
                                         orgId: data[0].orgId,
                                         bgId: data[0].bgId,
                                         projectId: data[0].projectId,
@@ -1354,6 +1367,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         err: true,
                                         log: "Unable to get infraManager data. client run failed",
                                         timestamp: timestampEnded,
+                                        instanceId: instance.platformId,
                                         orgId: instance.orgId,
                                         bgId: instance.bgId,
                                         projectId: instance.projectId,
@@ -1363,7 +1377,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         status: instance.instanceState,
                                         region: instance.region,
                                         size: instance.size,
-                                        user: instance.actionLogs[0].user,
+                                        user: actionLog.user,
                                         cpLink: "",
                                         logIcon: ""
                                     });
@@ -1380,6 +1394,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         err: true,
                                         log: "InfraManager information is corrupt. client run failed",
                                         timestamp: timestampEnded,
+                                        instanceId: instance.platformId,
                                         orgId: instance.orgId,
                                         bgId: instance.bgId,
                                         projectId: instance.projectId,
@@ -1389,7 +1404,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         status: instance.instanceState,
                                         region: instance.region,
                                         size: instance.size,
-                                        user: instance.actionLogs[0].user,
+                                        user: actionLog.user,
                                         cpLink: "",
                                         logIcon: ""
                                     });
@@ -1410,6 +1425,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             err: true,
                                             log: "Unable to decrypt pem file. client run failed",
                                             timestamp: timestampEnded,
+                                            instanceId: instance.platformId,
                                             orgId: instance.orgId,
                                             bgId: instance.bgId,
                                             projectId: instance.projectId,
@@ -1419,7 +1435,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             status: instance.instanceState,
                                             region: instance.region,
                                             size: instance.size,
-                                            user: instance.actionLogs[0].user,
+                                            user: actionLog.user,
                                             cpLink: "",
                                             logIcon: ""
                                         });
@@ -1439,6 +1455,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 err: true,
                                                 log: "Unable to generate client run execution id. client run failed",
                                                 timestamp: timestampEnded,
+                                                instanceId: instance.platformId,
                                                 orgId: instance.orgId,
                                                 bgId: instance.bgId,
                                                 projectId: instance.projectId,
@@ -1448,7 +1465,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 status: instance.instanceState,
                                                 region: instance.region,
                                                 size: instance.size,
-                                                user: instance.actionLogs[0].user,
+                                                user: actionLog.user,
                                                 cpLink: "",
                                                 logIcon: ""
                                             });
@@ -1534,6 +1551,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             err: false,
                                             log: 'Running client on the node',
                                             timestamp: new Date().getTime(),
+                                            instanceId: instance.platformId,
                                             orgId: instance.orgId,
                                             bgId: instance.bgId,
                                             projectId: instance.projectId,
@@ -1543,7 +1561,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             status: instance.instanceState,
                                             region: instance.region,
                                             size: instance.size,
-                                            user: instance.actionLogs[0].user,
+                                            user: actionLog.user,
                                             cpLink: "",
                                             logIcon: ""
                                         });
@@ -1565,6 +1583,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: true,
                                                     log: "Unable to run client",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
@@ -1574,7 +1593,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     status: instance.instanceState,
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -1597,6 +1616,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             err: false,
                                                             log: 'instance runlist updated',
                                                             timestamp: timestampEnded,
+                                                            instanceId: instance.platformId,
                                                             orgId: instance.orgId,
                                                             bgId: instance.bgId,
                                                             projectId: instance.projectId,
@@ -1606,7 +1626,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             status: instance.instanceState,
                                                             region: instance.region,
                                                             size: instance.size,
-                                                            user: instance.actionLogs[0].user,
+                                                            user: actionLog.user,
                                                             cpLink: "",
                                                             logIcon: ""
                                                         });
@@ -1645,6 +1665,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         err: false,
                                                         log: 'puppet client ran successfully',
                                                         timestamp: timestampEnded,
+                                                        instanceId: instance.platformId,
                                                         orgId: instance.orgId,
                                                         bgId: instance.bgId,
                                                         projectId: instance.projectId,
@@ -1654,7 +1675,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         status: instance.instanceState,
                                                         region: instance.region,
                                                         size: instance.size,
-                                                        user: instance.actionLogs[0].user,
+                                                        user: actionLog.user,
                                                         cpLink: "",
                                                         logIcon: ""
                                                     });
@@ -1667,6 +1688,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         err: true,
                                                         log: 'Host Unreachable',
                                                         timestamp: new Date().getTime(),
+                                                        instanceId: instance.platformId,
                                                         orgId: instance.orgId,
                                                         bgId: instance.bgId,
                                                         projectId: instance.projectId,
@@ -1676,7 +1698,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         status: instance.instanceState,
                                                         region: instance.region,
                                                         size: instance.size,
-                                                        user: instance.actionLogs[0].user,
+                                                        user: actionLog.user,
                                                         cpLink: "",
                                                         logIcon: ""
                                                     });
@@ -1686,6 +1708,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         err: true,
                                                         log: 'Invalid credentials',
                                                         timestamp: new Date().getTime(),
+                                                        instanceId: instance.platformId,
                                                         orgId: instance.orgId,
                                                         bgId: instance.bgId,
                                                         projectId: instance.projectId,
@@ -1695,7 +1718,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         status: instance.instanceState,
                                                         region: instance.region,
                                                         size: instance.size,
-                                                        user: instance.actionLogs[0].user,
+                                                        user: actionLog.user,
                                                         cpLink: "",
                                                         logIcon: ""
                                                     });
@@ -1706,6 +1729,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         err: true,
                                                         log: 'Unknown error occured. ret code = ' + retCode,
                                                         timestamp: new Date().getTime(),
+                                                        instanceId: instance.platformId,
                                                         orgId: instance.orgId,
                                                         bgId: instance.bgId,
                                                         projectId: instance.projectId,
@@ -1715,7 +1739,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         status: instance.instanceState,
                                                         region: instance.region,
                                                         size: instance.size,
-                                                        user: instance.actionLogs[0].user,
+                                                        user: actionLog.user,
                                                         cpLink: "",
                                                         logIcon: ""
                                                     });
@@ -1727,6 +1751,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: true,
                                                     log: 'Unable to run client',
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
@@ -1736,7 +1761,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     status: instance.instanceState,
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -1749,6 +1774,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 err: false,
                                                 log: stdOutData.toString('ascii'),
                                                 timestamp: new Date().getTime(),
+                                                instanceId: instance.platformId,
                                                 orgId: instance.orgId,
                                                 bgId: instance.bgId,
                                                 projectId: instance.projectId,
@@ -1758,7 +1784,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 status: instance.instanceState,
                                                 region: instance.region,
                                                 size: instance.size,
-                                                user: instance.actionLogs[0].user,
+                                                user: actionLog.user,
                                                 cpLink: "",
                                                 logIcon: ""
                                             });
@@ -1769,6 +1795,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 err: true,
                                                 log: stdOutErr.toString('ascii'),
                                                 timestamp: new Date().getTime(),
+                                                instanceId: instance.platformId,
                                                 orgId: instance.orgId,
                                                 bgId: instance.bgId,
                                                 projectId: instance.projectId,
@@ -1778,7 +1805,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 status: instance.instanceState,
                                                 region: instance.region,
                                                 size: instance.size,
-                                                user: instance.actionLogs[0].user,
+                                                user: actionLog.user,
                                                 cpLink: "",
                                                 logIcon: ""
                                             });
@@ -1838,6 +1865,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 err: false,
                                 log: "Instance Stopping",
                                 timestamp: timestampStarted,
+                                instanceId: instance.platformId,
                                 orgId: instance.orgId,
                                 bgId: instance.bgId,
                                 projectId: instance.projectId,
@@ -1847,7 +1875,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 status: instance.instanceState,
                                 region: instance.region,
                                 size: instance.size,
-                                user: instance.actionLogs[0].user,
+                                user: actionLog.user,
                                 cpLink: "",
                                 logIcon: ""
                             });
@@ -1861,6 +1889,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     err: true,
                                     log: "Insufficient provider details, to complete the operation",
                                     timestamp: new Date().getTime(),
+                                    instanceId: instance.platformId,
                                     orgId: instance.orgId,
                                     bgId: instance.bgId,
                                     projectId: instance.projectId,
@@ -1870,7 +1899,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     status: instance.instanceState,
                                     region: instance.region,
                                     size: instance.size,
-                                    user: instance.actionLogs[0].user,
+                                    user: actionLog.user,
                                     cpLink: "",
                                     logIcon: ""
                                 });
@@ -1912,16 +1941,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: false,
                                                     log: "Instance Stopping",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
                                                     envId: instance.envId,
                                                     providerIcon: "",
                                                     osIcon: "",
-                                                    status: instance.instanceState,
+                                                    status: "stopped",
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -1940,16 +1970,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: false,
                                                     log: "Instance Stopped",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
                                                     envId: instance.envId,
                                                     providerIcon: "",
                                                     osIcon: "",
-                                                    status: instance.instanceState,
+                                                    status: "stopped",
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -1967,6 +1998,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: true,
                                                     log: "Unable to stop instance",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
@@ -1999,6 +2031,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     err: true,
                                     log: "Unable to stop openstack instance",
                                     timestamp: timestampEnded,
+                                    instanceId: instance.platformId,
                                     orgId: instance.orgId,
                                     bgId: instance.bgId,
                                     projectId: instance.projectId,
@@ -2008,7 +2041,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     status: instance.instanceState,
                                     region: instance.region,
                                     size: instance.size,
-                                    user: instance.actionLogs[0].user,
+                                    user: actionLog.user,
                                     cpLink: "",
                                     logIcon: ""
                                 });
@@ -2072,6 +2105,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             err: true,
                                                             log: "Unable to stop instance",
                                                             timestamp: timestampEnded,
+                                                            instanceId: instance.platformId,
                                                             orgId: instance.orgId,
                                                             bgId: instance.bgId,
                                                             projectId: instance.projectId,
@@ -2081,7 +2115,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             status: instance.instanceState,
                                                             region: instance.region,
                                                             size: instance.size,
-                                                            user: instance.actionLogs[0].user,
+                                                            user: actionLog.user,
                                                             cpLink: "",
                                                             logIcon: ""
                                                         });
@@ -2128,16 +2162,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         err: false,
                                                         log: "Instance Stopped",
                                                         timestamp: timestampEnded,
+                                                        instanceId: instance.platformId,
                                                         orgId: instance.orgId,
                                                         bgId: instance.bgId,
                                                         projectId: instance.projectId,
                                                         envId: instance.envId,
                                                         providerIcon: "",
                                                         osIcon: "",
-                                                        status: instance.instanceState,
+                                                        status: "stopped",
                                                         region: instance.region,
                                                         size: instance.size,
-                                                        user: instance.actionLogs[0].user,
+                                                        user: actionLog.user,
                                                         cpLink: "",
                                                         logIcon: ""
                                                     });
@@ -2194,6 +2229,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: true,
                                                     log: "Unable to stop instance",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
@@ -2203,7 +2239,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     status: instance.instanceState,
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -2239,16 +2275,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 err: false,
                                                 log: "Instance Stopped",
                                                 timestamp: timestampEnded,
+                                                instanceId: instance.platformId,
                                                 orgId: instance.orgId,
                                                 bgId: instance.bgId,
                                                 projectId: instance.projectId,
                                                 envId: instance.envId,
                                                 providerIcon: "",
                                                 osIcon: "",
-                                                status: instance.instanceState,
+                                                status: "stopped",
                                                 region: instance.region,
                                                 size: instance.size,
-                                                user: instance.actionLogs[0].user,
+                                                user: actionLog.user,
                                                 cpLink: "",
                                                 logIcon: ""
                                             });
@@ -2327,6 +2364,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: true,
                                                     log: "Unable to stop instance",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
@@ -2336,7 +2374,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     status: instance.instanceState,
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -2378,16 +2416,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 err: false,
                                                 log: "Instance Stopped",
                                                 timestamp: timestampEnded,
+                                                instanceId: instance.platformId,
                                                 orgId: instance.orgId,
                                                 bgId: instance.bgId,
                                                 projectId: instance.projectId,
                                                 envId: instance.envId,
                                                 providerIcon: "",
                                                 osIcon: "",
-                                                status: instance.instanceState,
+                                                status: state,
                                                 region: instance.region,
                                                 size: instance.size,
-                                                user: instance.actionLogs[0].user,
+                                                user: actionLog.user,
                                                 cpLink: "",
                                                 logIcon: ""
                                             });
@@ -2470,16 +2509,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: false,
                                                     log: "Instance Starting",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
                                                     envId: instance.envId,
                                                     providerIcon: "",
                                                     osIcon: "",
-                                                    status: instance.instanceState,
+                                                    status: "running",
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -2498,16 +2538,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: false,
                                                     log: "Instance Started",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
                                                     envId: instance.envId,
                                                     providerIcon: "",
                                                     osIcon: "",
-                                                    status: instance.instanceState,
+                                                    status: "running",
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -2525,6 +2566,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: true,
                                                     log: "Unable to start instance",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
@@ -2534,7 +2576,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     status: instance.instanceState,
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -2567,6 +2609,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     err: false,
                                     log: "Instance Starting",
                                     timestamp: timestampStarted,
+                                    instanceId: instance.platformId,
                                     orgId: instance.orgId,
                                     bgId: instance.bgId,
                                     projectId: instance.projectId,
@@ -2576,7 +2619,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     status: instance.instanceState,
                                     region: instance.region,
                                     size: instance.size,
-                                    user: instance.actionLogs[0].user,
+                                    user: actionLog.user,
                                     cpLink: "",
                                     logIcon: ""
                                 });
@@ -2590,6 +2633,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         err: true,
                                         log: "Insufficient provider details, to complete the operation",
                                         timestamp: new Date().getTime(),
+                                        instanceId: instance.platformId,
                                         orgId: instance.orgId,
                                         bgId: instance.bgId,
                                         projectId: instance.projectId,
@@ -2599,7 +2643,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         status: instance.instanceState,
                                         region: instance.region,
                                         size: instance.size,
-                                        user: instance.actionLogs[0].user,
+                                        user: actionLog.user,
                                         cpLink: "",
                                         logIcon: ""
                                     });
@@ -2659,6 +2703,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             err: true,
                                                             log: "Unable to start instance",
                                                             timestamp: timestampEnded,
+                                                            instanceId: instance.platformId,
                                                             orgId: instance.orgId,
                                                             bgId: instance.bgId,
                                                             projectId: instance.projectId,
@@ -2668,7 +2713,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                             status: instance.instanceState,
                                                             region: instance.region,
                                                             size: instance.size,
-                                                            user: instance.actionLogs[0].user,
+                                                            user: actionLog.user,
                                                             cpLink: "",
                                                             logIcon: ""
                                                         });
@@ -2715,16 +2760,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                         err: false,
                                                         log: "Instance Started",
                                                         timestamp: timestampEnded,
+                                                        instanceId: instance.platformId,
                                                         orgId: instance.orgId,
                                                         bgId: instance.bgId,
                                                         projectId: instance.projectId,
                                                         envId: instance.envId,
                                                         providerIcon: "",
                                                         osIcon: "",
-                                                        status: instance.instanceState,
+                                                        status: "running",
                                                         region: instance.region,
                                                         size: instance.size,
-                                                        user: instance.actionLogs[0].user,
+                                                        user: actionLog.user,
                                                         cpLink: "",
                                                         logIcon: ""
                                                     });
@@ -2788,6 +2834,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                         err: false,
                                         log: "Instance Starting",
                                         timestamp: timestampStarted,
+                                        instanceId: instance.platformId,
                                         orgId: instance.orgId,
                                         bgId: instance.bgId,
                                         projectId: instance.projectId,
@@ -2811,6 +2858,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: true,
                                                     log: "Unable to start instance",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
@@ -2860,16 +2908,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 err: false,
                                                 log: "Instance Started",
                                                 timestamp: timestampEnded,
+                                                instanceId: instance.platformId,
                                                 orgId: instance.orgId,
                                                 bgId: instance.bgId,
                                                 projectId: instance.projectId,
                                                 envId: instance.envId,
                                                 providerIcon: "",
                                                 osIcon: "",
-                                                status: instance.instanceState,
+                                                status: "running",
                                                 region: instance.region,
                                                 size: instance.size,
-                                                user: instance.actionLogs[0].user,
+                                                user: actionLog.user,
                                                 cpLink: "",
                                                 logIcon: ""
                                             });
@@ -2922,12 +2971,12 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             logReferenceIds.push(actionLog._id);
                                         }
 
-
                                         logsDao.insertLog({
                                             referenceId: logReferenceIds,
                                             err: false,
                                             log: "Instance Starting",
                                             timestamp: timestampStarted,
+                                            instanceId: instance.platformId,
                                             orgId: instance.orgId,
                                             bgId: instance.bgId,
                                             projectId: instance.projectId,
@@ -2937,7 +2986,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                             status: instance.instanceState,
                                             region: instance.region,
                                             size: instance.size,
-                                            user: instance.actionLogs[0].user,
+                                            user: actionLog.user,
                                             cpLink: "",
                                             logIcon: ""
                                         });
@@ -2973,6 +3022,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     err: true,
                                                     log: "Unable to start instance",
                                                     timestamp: timestampEnded,
+                                                    instanceId: instance.platformId,
                                                     orgId: instance.orgId,
                                                     bgId: instance.bgId,
                                                     projectId: instance.projectId,
@@ -2982,7 +3032,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                     status: instance.instanceState,
                                                     region: instance.region,
                                                     size: instance.size,
-                                                    user: instance.actionLogs[0].user,
+                                                    user: actionLog.user,
                                                     cpLink: "",
                                                     logIcon: ""
                                                 });
@@ -3023,16 +3073,17 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 err: false,
                                                 log: "Instance Started",
                                                 timestamp: timestampEnded,
+                                                instanceId: instance.platformId,
                                                 orgId: instance.orgId,
                                                 bgId: instance.bgId,
                                                 projectId: instance.projectId,
                                                 envId: instance.envId,
                                                 providerIcon: "",
                                                 osIcon: "",
-                                                status: instance.instanceState,
+                                                status: startingInstances[0].CurrentState.Name,
                                                 region: instance.region,
                                                 size: instance.size,
-                                                user: instance.actionLogs[0].user,
+                                                user: actionLog.user,
                                                 cpLink: "",
                                                 logIcon: ""
                                             });
@@ -3199,6 +3250,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             err: true,
                             log: 'Unable to run services',
                             timestamp: timestampEnded,
+                            instanceId: instance.platformId,
                             orgId: instance.orgId,
                             bgId: instance.bgId,
                             projectId: instance.projectId,
@@ -3208,7 +3260,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             status: instance.instanceState,
                             region: instance.region,
                             size: instance.size,
-                            user: instance.actionLogs[0].user,
+                            user: actionLog.user,
                             cpLink: "",
                             logIcon: ""
                         });
@@ -3224,6 +3276,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             err: false,
                             log: 'Service run success',
                             timestamp: timestampEnded,
+                            instanceId: instance.platformId,
                             orgId: instance.orgId,
                             bgId: instance.bgId,
                             projectId: instance.projectId,
@@ -3233,7 +3286,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             status: instance.instanceState,
                             region: instance.region,
                             size: instance.size,
-                            user: instance.actionLogs[0].user,
+                            user: actionLog.user,
                             cpLink: "",
                             logIcon: ""
                         });
@@ -3246,6 +3299,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 err: true,
                                 log: 'Host Unreachable',
                                 timestamp: timestampEnded,
+                                instanceId: instance.platformId,
                                 orgId: instance.orgId,
                                 bgId: instance.bgId,
                                 projectId: instance.projectId,
@@ -3255,7 +3309,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 status: instance.instanceState,
                                 region: instance.region,
                                 size: instance.size,
-                                user: instance.actionLogs[0].user,
+                                user: actionLog.user,
                                 cpLink: "",
                                 logIcon: ""
                             });
@@ -3265,6 +3319,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 err: true,
                                 log: 'Invalid credentials',
                                 timestamp: timestampEnded,
+                                instanceId: instance.platformId,
                                 orgId: instance.orgId,
                                 bgId: instance.bgId,
                                 projectId: instance.projectId,
@@ -3274,7 +3329,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 status: instance.instanceState,
                                 region: instance.region,
                                 size: instance.size,
-                                user: instance.actionLogs[0].user,
+                                user: actionLog.user,
                                 cpLink: "",
                                 logIcon: ""
                             });
@@ -3284,6 +3339,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 err: true,
                                 log: 'Unknown error occured. ret code = ' + retCode,
                                 timestamp: timestampEnded,
+                                instanceId: instance.platformId,
                                 orgId: instance.orgId,
                                 bgId: instance.bgId,
                                 projectId: instance.projectId,
@@ -3293,7 +3349,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                 status: instance.instanceState,
                                 region: instance.region,
                                 size: instance.size,
-                                user: instance.actionLogs[0].user,
+                                user: actionLog.user,
                                 cpLink: "",
                                 logIcon: ""
                             });
@@ -3304,6 +3360,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             err: true,
                             log: 'Unable to run services',
                             timestamp: timestampEnded,
+                            instanceId: instance.platformId,
                             orgId: instance.orgId,
                             bgId: instance.bgId,
                             projectId: instance.projectId,
@@ -3313,7 +3370,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             status: instance.instanceState,
                             region: instance.region,
                             size: instance.size,
-                            user: instance.actionLogs[0].user,
+                            user: actionLog.user,
                             cpLink: "",
                             logIcon: ""
                         });
@@ -3328,6 +3385,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                         err: false,
                         log: stdOutData.toString('ascii'),
                         timestamp: new Date().getTime(),
+                        instanceId: instance.platformId,
                         orgId: instance.orgId,
                         bgId: instance.bgId,
                         projectId: instance.projectId,
@@ -3337,7 +3395,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                         status: instance.instanceState,
                         region: instance.region,
                         size: instance.size,
-                        user: instance.actionLogs[0].user,
+                        user: actionLog.user,
                         cpLink: "",
                         logIcon: ""
                     });
@@ -3349,6 +3407,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                         err: true,
                         log: stdOutErr.toString('ascii'),
                         timestamp: new Date().getTime(),
+                        instanceId: instance.platformId,
                         orgId: instance.orgId,
                         bgId: instance.bgId,
                         projectId: instance.projectId,
@@ -3358,7 +3417,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                         status: instance.instanceState,
                         region: instance.region,
                         size: instance.size,
-                        user: instance.actionLogs[0].user,
+                        user: actionLog.user,
                         cpLink: "",
                         logIcon: ""
                     });
@@ -3372,6 +3431,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             err: true,
                             log: 'Unable to decrypt credentials. Unable to run service',
                             timestamp: timestampEnded,
+                            instanceId: instance.platformId,
                             orgId: instance.orgId,
                             bgId: instance.bgId,
                             projectId: instance.projectId,
@@ -3381,7 +3441,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                             status: instance.instanceState,
                             region: instance.region,
                             size: instance.size,
-                            user: instance.actionLogs[0].user,
+                            user: actionLog.user,
                             cpLink: "",
                             logIcon: ""
                         });
@@ -3401,6 +3461,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     err: true,
                                     log: 'Chef Data corrupted. Unable to run service',
                                     timestamp: timestampEnded,
+                                    instanceId: instance.platformId,
                                     orgId: instance.orgId,
                                     bgId: instance.bgId,
                                     projectId: instance.projectId,
@@ -3410,7 +3471,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     status: instance.instanceState,
                                     region: instance.region,
                                     size: instance.size,
-                                    user: instance.actionLogs[0].user,
+                                    user: actionLog.user,
                                     cpLink: "",
                                     logIcon: ""
                                 });
@@ -3428,6 +3489,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     err: true,
                                     log: 'Chef Data corrupted. Unable to run service',
                                     timestamp: timestampEnded,
+                                    instanceId: instance.platformId,
                                     orgId: instance.orgId,
                                     bgId: instance.bgId,
                                     projectId: instance.projectId,
@@ -3437,7 +3499,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                     status: instance.instanceState,
                                     region: instance.region,
                                     size: instance.size,
-                                    user: instance.actionLogs[0].user,
+                                    user: actionLog.user,
                                     cpLink: "",
                                     logIcon: ""
                                 });

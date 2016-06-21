@@ -25,16 +25,17 @@ var LogSchema = new Schema({
     err: Boolean,
     log: String,
     timestamp: Number,
-    orgId: String, // instance
-    bgId: String, // instance
-    projectId: String, // instance
-    envId: String, // instance
+    instanceId: String,
+    orgId: String,
+    bgId: String,
+    projectId: String,
+    envId: String,
     providerIcon: String,
     osIcon: String,
-    status: String, // instance
-    region: String, // instance
-    size: String, // blueprint
-    user: String, // instance.actionLogs[0].user
+    status: String,
+    region: String,
+    size: String,
+    user: String,
     cpLink: String,
     logIcon: String
 });
