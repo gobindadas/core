@@ -3080,7 +3080,7 @@ module.exports.setRoutes = function(app, sessionVerificationFunc) {
                                                 envId: instance.envId,
                                                 providerIcon: "",
                                                 osIcon: "",
-                                                status: startingInstances[0].CurrentState.Name,
+                                                status: state,
                                                 region: instance.region,
                                                 size: instance.size,
                                                 user: actionLog.user,
