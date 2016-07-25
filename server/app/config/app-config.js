@@ -19,8 +19,6 @@ var mkdirp = require('mkdirp');
 var fs = require('fs');
 var currentDirectory = __dirname;
 var path = require('path');
-var logger = require('_pr/logger')(module);
-
 
 var configJson;
 try {
@@ -28,7 +26,7 @@ try {
         'encoding': 'utf8'
     });
 } catch (err) {
-    logger.error(err);
+    console.log(err);
     configJson = null;
     throw err;
 }
@@ -40,7 +38,7 @@ try {
     });
 
 } catch (err) {
-    logger.error(err);
+    console.log(err);
     appUrlsConfig = null;
 }
 
@@ -51,7 +49,7 @@ try {
     });
 
 } catch (err) {
-    logger.error(err);
+    console.log(err);
     catalystConstants = null;
 }
 
@@ -80,7 +78,5 @@ mkdirp.sync(config.chef.cookbooksDir);
 mkdirp.sync(config.scriptDir);
 
 var chefRepoLocation = mkdirp.sync(config.chef.chefReposLocation);
-logger.debug('chef repo location ==>', config.chef.chefReposLocation);
-
 
 module.exports = config;

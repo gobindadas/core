@@ -24,7 +24,6 @@ var fs = require('fs');
 var childProcess = require('child_process');
 var socketIo = require('_pr/socket.io');
 var logger = require('_pr/logger')(module);
-var expressLogger = require('_pr/logger').ExpressLogger();
 var passport = require('passport');
 var passportLdapStrategy = require('./lib/ldapPassportStrategy.js');
 var passportADStrategy = require('./lib/adPassportStrategy.js');
