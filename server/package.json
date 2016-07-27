@@ -71,7 +71,9 @@
 		"fs":"0.0.2",
         "cors": "2.7.1",
         "events": "1.1.1",
-        "gridfs-stream":"1.1.1"
+        "gridfs-stream":"1.1.1",
+        "mongoskin": "2.1.0",
+        "tracer": "0.8.3"
     },
     "devDependencies": {
         "grunt": "0.4.5",
