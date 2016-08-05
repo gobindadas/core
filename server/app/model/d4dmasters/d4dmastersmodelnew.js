@@ -316,7 +316,9 @@ var d4dMastersTeams = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
-    }
+    },
+    environmentname: String,
+    environmentname_rowid: String
 }, {
     collection: 'd4dmastersnew'
 });
