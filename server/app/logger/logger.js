@@ -16,12 +16,61 @@
 var mongo = require('mongoskin');
 var logger = require('tracer');
 var appConfig = require('_pr/config');
+var uuid = require('node-uuid');
+var Client = require('node-rest-client').Client;
 var CatLogger = function() {
     var db = mongo.db("mongodb://" + appConfig.db.host + ":" + appConfig.db.port + "/" + appConfig.db.dbName);
 
     var log_conf = {
         transport: function(data) {
             console.log(data.output);
+            /*var elkIndexVal = "catalyst-index";
+            var elkType = "applog";
+            var elkData = {
+                "@timestamp": new Date(),
+                "count": 1,
+                "fields": null,
+                "input_type": "log",
+                "message": data.message,
+                "offset": Math.floor((Math.random() * 10000) + 10),
+                "source": data.path,
+                "type": data.title
+            };
+
+            var client = new Client();
+            var elkUrl = "http://localhost:9200/" + elkIndexVal + "/" + elkType + "/";
+            // set content-type header and data as json in args parameter 
+            var args = {
+                data: elkData,
+                headers: { "Content-Type": "application/json" }
+            };
+
+            var req = client.post(elkUrl, args, function(resData, response) {
+                
+            });
+            req.on('requestTimeout', function(req) {
+                console.log('request has expired');
+                req.abort();
+            });
+
+            req.on('responseTimeout', function(res) {
+                console.log('response has expired');
+
+            });
+            req.on('error', function(err) {
+                console.log('request error', err);
+            });*/
+
+            // registering remote methods 
+            /*client.registerMethod("postMethod", elkUrl, "POST");
+
+            client.methods.postMethod(args, function(resData, response) {
+                // parsed response body as js object 
+                console.log(resData);
+                // raw response 
+                console.log(response);
+            });*/
+
             var loginfo = db.collection("CatalystLog");
             loginfo.insert(data, function(err, log) {
                 if (err) {
